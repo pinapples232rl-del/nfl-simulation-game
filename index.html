@@ -1,2 +1,134 @@
-# nfl-simulation-game
-an NFL game
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>17-0: Ultimate NFL Simulator</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #121212; color: #fff; text-align: center; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        button { background: #013369; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; margin: 10px; }
+        button:hover { background: #d50a0a; }
+        input, select { padding: 8px; margin: 5px; border-radius: 4px; border: none; width: 80%; }
+        .hidden { display: none; }
+        .log { background: #000; padding: 10px; border-radius: 5px; text-align: left; max-height: 200px; overflow-y: auto; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏈 17-0: NFL Season Simulator</h1>
+        
+        <!-- STEP 1: CREATE TEAM -->
+        <div id="setup-screen">
+            <h3>Create Your Franchise</h3>
+            <input type="text" id="team-name" placeholder="Enter Team Name (e.g., Texas Torpedoes)">
+            <br>
+            <label>Select Team Focus:</label>
+            <select id="team-focus">
+                <option value="balanced">Balanced</option>
+                <option value="offense">Air Raid (High Offense)</option>
+                <option value="defense">Steel Curtain (High Defense)</option>
+            </select>
+            <br>
+            <h3>Build Your Superstar Player</h3>
+            <input type="text" id="player-name" placeholder="Superstar Name">
+            <select id="player-pos">
+                <option value="QB">Quarterback</option>
+                <option value="RB">Running Back</option>
+                <option value="WR">Wide Receiver</option>
+            </select>
+            <br>
+            <button onclick="startGame()">Kick Off Season</button>
+        </div>
+
+        <!-- STEP 2: SIMULATE SEASON -->
+        <div id="game-screen" class="hidden">
+            <h2 id="display-team">Your Team</h2>
+            <p id="display-player"></p>
+            <h3 id="record-display">Record: 0 - 0</h3>
+            <h4 id="week-display">Next Matchup: Week 1</h4>
+            <button id="sim-btn" onclick="simulateWeek()">Simulate Next Game</button>
+            
+            <h3>Season Game Log</h3>
+            <div class="log" id="game-log"></div>
+        </div>
+    </div>
+
+    <script>
+        let team = { name: "", offense: 75, defense: 75, wins: 0, losses: 0 };
+        let currentWeek = 1;
+
+        function startGame() {
+            const nameInput = document.getElementById("team-name").value;
+            const pName = document.getElementById("player-name").value;
+            const pPos = document.getElementById("player-pos").value;
+            const focus = document.getElementById("team-focus").value;
+
+            if (!nameInput || !pName) {
+                alert("Please name your team and player!");
+                return;
+            }
+
+            team.name = nameInput;
+            if (focus === "offense") team.offense += 10;
+            if (focus === "defense") team.defense += 10;
+
+            document.getElementById("display-team").innerText = `🏈 ${team.name}`;
+            document.getElementById("display-player").innerText = `Star Player: ${pName} (${pPos})`;
+            
+            document.getElementById("setup-screen").classList.add("hidden");
+            document.getElementById("game-screen").classList.remove("hidden");
+        }
+
+        function simulateWeek() {
+            if (currentWeek > 17) {
+                alert(`Season over! Final Record: ${team.wins}-${team.losses}`);
+                return;
+            }
+
+            // Simple math simulation logic
+            let opponentRating = Math.floor(Math.random() * 25) + 65; // Opponent rating between 65 and 90
+            let userPower = (team.offense + team.defense) / 2;
+            
+            // Random variance factor (-10 to +10)
+            let luck = Math.floor(Math.random() * 21) - 10;
+            
+            let userScore = Math.floor((userPower + luck) / 3);
+            let oppScore = Math.floor((opponentRating - luck) / 3);
+            if (userScore === oppScore) userScore += 1; // No ties for simplicity
+
+            let resultText = "";
+            if (userScore > oppScore) {
+                team.wins++;
+                resultText = `Week ${currentWeek}: W ${userScore}-${oppScore} vs Opponent`;
+            } else {
+                team.losses++;
+                resultText = `Week ${currentWeek}: L ${userScore}-${oppScore} vs Opponent`;
+            }
+
+            // Append to log
+            const log = document.getElementById("game-log");
+            log.innerHTML = `<div>${resultText}</div>` + log.innerHTML;
+
+            // Update UI
+            document.getElementById("record-display").innerText = `Record: ${team.wins} - ${team.losses}`;
+            currentWeek++;
+
+            if (currentWeek <= 17) {
+                document.getElementById("week-display").innerText = `Next Matchup: Week ${currentWeek}`;
+            } else {
+                document.getElementById("week-display").innerText = "Season Complete!";
+                document.getElementById("sim-btn").innerText = "Reset Season";
+                document.getElementById("sim-btn").setAttribute("onclick", "location.reload()");
+                
+                if (team.wins === 17) {
+                    log.innerHTML = `<div style="color: #00ff00; font-weight: bold;">🏆 PERFECT 17-0 SEASON! YOU ARE A LEGEND!</div>` + log.innerHTML;
+                } else {
+                    log.innerHTML = `<div style="color: #ff3333;">You missed out on 17-0. Try again!</div>` + log.innerHTML;
+                }
+            }
+        }
+    </script>
+</body>
+</html>
+
