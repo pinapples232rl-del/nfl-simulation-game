@@ -3,99 +3,243 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>17-0: Ultimate NFL Simulator</title>
+    <title>17-0 & Ring Run: Ultimate NFL Simulator</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #121212; color: #fff; text-align: center; padding: 20px; }
-        .container { max-width: 700px; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .tabs { display: flex; justify-content: center; margin-bottom: 20px; border-bottom: 2px solid #333; }
-        .tab-btn { background: none; color: #aaa; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 5px 5px 0 0; }
-        .tab-btn.active { color: #fff; background: #013369; border-bottom: 3px solid #d50a0a; font-weight: bold; }
-        button.action-btn { background: #013369; color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 5px; cursor: pointer; margin: 15px 0; width: 100%; font-weight: bold; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0b0f19; color: #fff; text-align: center; padding: 20px; margin: 0; }
+        .container { max-width: 800px; margin: 30px auto; background: #141d2f; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); border: 1px solid #222f47; }
+        .tabs { display: flex; justify-content: center; margin-bottom: 25px; gap: 10px; }
+        .tab-btn { background: #1e293b; color: #94a3b8; border: 1px solid #334155; padding: 12px 24px; font-size: 15px; cursor: pointer; border-radius: 6px; font-weight: bold; transition: all 0.2s ease; }
+        .tab-btn.active { color: #fff; background: #013369; border-color: #d50a0a; box-shadow: 0 0 10px rgba(1, 51, 105, 0.5); }
+        button.action-btn { background: #013369; color: white; border: none; padding: 14px 28px; font-size: 16px; border-radius: 6px; cursor: pointer; margin: 15px 0; width: 100%; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; transition: background 0.2s; }
         button.action-btn:hover { background: #d50a0a; }
-        select, input { padding: 10px; margin: 8px 0; border-radius: 4px; border: none; width: 100%; box-sizing: border-box; background: #333; color: white; font-size: 15px; }
+        select { padding: 12px; margin: 10px 0; border-radius: 6px; border: 1px solid #334155; width: 100%; background: #1e293b; color: white; font-size: 16px; }
         .hidden { display: none; }
-        .log { background: #000; padding: 15px; border-radius: 5px; text-align: left; max-height: 250px; overflow-y: auto; font-family: monospace; line-height: 1.5; border: 1px solid #333; }
-        .info-box { background: #282828; padding: 15px; border-radius: 6px; margin: 15px 0; text-align: left; border-left: 5px solid #013369; }
-        .info-box h4 { margin: 0 0 8px 0; color: #013369; text-transform: uppercase; font-size: 13px; }
-        .roster-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 14px; color: #ccc; }
+        .log { background: #020617; padding: 20px; border-radius: 8px; text-align: left; max-height: 300px; overflow-y: auto; font-family: 'Courier New', monospace; line-height: 1.6; border: 1px solid #1e293b; }
+        .info-box { background: #1e293b; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: left; border-left: 6px solid #013369; }
+        .info-box h4 { margin: 0 0 12px 0; color: #38bdf8; text-transform: uppercase; font-size: 14px; letter-spacing: 0.5px; }
+        .roster-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 14px; color: #cbd5e1; }
+        .stat-badge { background: #0f172a; padding: 4px 8px; border-radius: 4px; font-weight: bold; color: #fbbf24; font-size: 12px; float: right; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🏈 Ultimate NFL Simulator</h1>
+        <h1>🏈 NFL Gridiron Simulator</h1>
+        
         <div class="tabs">
-            <button id="tab-custom" class="tab-btn active" onclick="switchMode('custom')">Custom Create</button>
-            <button id="tab-real" class="tab-btn" onclick="switchMode('real')">🏆 17-0 Franchise Mode</button>
+            <button id="tab-classic" class="tab-btn active" onclick="switchMode('classic')">Standard 17-0 Run</button>
+            <button id="tab-ring" class="tab-btn" onclick="switchMode('ring')">🏆 Ring Run Mode</button>
         </div>
-        <div id="custom-setup">
-            <h3>Create a Custom Franchise</h3>
-            <input type="text" id="team-name" placeholder="Enter Custom Team Name">
-            <select id="team-focus">
-                <option value="balanced">Balanced Focus (75 OFF / 75 DEF)</option>
-                <option value="offense">Air Raid Focus (85 OFF / 75 DEF)</option>
-                <option value="defense">Steel Curtain Focus (75 OFF / 85 DEF)</option>
+
+        <!-- SELECTION SCREEN -->
+        <div id="setup-screen">
+            <h3>Choose Your Franchise (Madden Ratings Engine)</h3>
+            <select id="team-select" onchange="updateTeamPreview()">
+                <!-- Automatically populated by JS -->
             </select>
-            <button class="action-btn" onclick="startCustomGame()">Kick Off Custom Season</button>
-        </div>
-        <div id="real-setup" class="hidden">
-            <h3>Select a Real NFL Franchise (2026-2027 Season)</h3>
-            <select id="team-select" onchange="previewRealTeam()">
-                <option value="Chiefs">Kansas City Chiefs</option>
-                <option value="49ers">San Francisco 49ers</option>
-                <option value="Ravens">Baltimore Ravens</option>
-                <option value="Lions">Detroit Lions</option>
-                <option value="Cowboys">Dallas Cowboys</option>
-            </select>
+            
             <div id="preview-card" class="info-box">
-                <h4 id="prev-head">Team Profile</h4>
-                <p><strong>Head Coach:</strong> <span id="prev-coach"></span></p>
+                <h2 id="prev-name" style="margin: 0 0 10px 0; color: #fff;">Team</h2>
+                <p><strong>Madden Team OVR:</strong> <span id="prev-ovr"></span> (OFF: <span id="prev-off"></span> | DEF: <span id="prev-def"></span>)</p>
+                <h4>Core Star Roster Overalls</h4>
                 <div class="roster-grid" id="prev-roster"></div>
             </div>
-            <button class="action-btn" style="background: #d50a0a;" onclick="startRealGame()">Take Command & Go 17-0</button>
+            <button class="action-btn" onclick="launchFranchise()">Take Command</button>
         </div>
+
+        <!-- SIMULATION ACTIVE DASHBOARD -->
         <div id="game-screen" class="hidden">
             <h2 id="display-team">Active Team</h2>
-            <div class="info-box"><p><strong>Record:</strong> <span id="record-display">0 - 0</span></p></div>
+            <div class="info-box" style="display: flex; justify-content: space-around; text-align: center;">
+                <div><h5>MODE</h5><p id="display-mode" style="font-weight:bold; color:#fbbf24; margin:5px 0;">17-0</p></div>
+                <div><h5>RECORD</h5><p id="record-display" style="font-weight:bold; font-size: 1.4em; margin:5px 0;">0 - 0</p></div>
+                <div><h5>TEAM RATING</h5><p id="display-rating" style="font-weight:bold; margin:5px 0;">80</p></div>
+            </div>
             <h3 id="week-display">Next Matchup: Week 1</h3>
-            <button id="sim-btn" class="action-btn" onclick="simulateWeek()">Simulate Next Game</button>
+            <button id="sim-btn" class="action-btn" onclick="processSimStep()">Simulate Next Game</button>
             <div class="log" id="game-log"></div>
         </div>
     </div>
+
     <script>
-        // Full team database and simulation logic available in source references.
-        const nflDatabase = {
-            Chiefs: { name: "Kansas City Chiefs", coach: "Andy Reid", offense: 92, defense: 84, roster: ["QB Patrick Mahomes", "TE Travis Kelce"], schedule: ["Broncos", "Chargers"] },
-            "49ers": { name: "San Francisco 49ers", coach: "Kyle Shanahan", offense: 89, defense: 88, roster: ["QB Brock Purdy", "RB Christian McCaffrey"], schedule: ["Rams", "Dolphins"] },
-            Ravens: { name: "Baltimore Ravens", coach: "John Harbaugh", offense: 90, defense: 87, roster: ["QB Lamar Jackson", "RB Derrick Henry"], schedule: ["49ers", "Bengals"] },
-            Lions: { name: "Detroit Lions", coach: "Dan Campbell", offense: 91, defense: 83, roster: ["QB Jared Goff", "RB Jahmyr Gibbs"], schedule: ["Bills", "Bears"] },
-            Cowboys: { name: "Dallas Cowboys", coach: "Mike McCarthy", offense: 85, defense: 84, roster: ["QB Dak Prescott", "WR CeeDee Lamb"], schedule: ["Giants", "Commanders"] }
-        };
-        let activeGame = { teamName: "", coach: "", wins: 0, losses: 0, currentWeek: 1, schedule: [] };
-        function switchMode(m) {
-            document.getElementById("custom-setup").classList.toggle("hidden", m !== 'custom');
-            document.getElementById("real-setup").classList.toggle("hidden", m !== 'real');
-            if(m === 'real') previewRealTeam();
-        }
-        function previewRealTeam() {
-            const sel = document.getElementById("team-select").value, data = nflDatabase[sel];
-            document.getElementById("prev-head").innerText = data.name;
-            document.getElementById("prev-coach").innerText = data.coach;
-            document.getElementById("prev-roster").innerHTML = data.roster.map(p => `<div>• ${p}</div>`).join('');
-        }
-        function startRealGame() {
-            const sel = document.getElementById("team-select").value, data = nflDatabase[sel];
-            activeGame = { teamName: data.name, coach: data.coach, wins: 0, losses: 0, currentWeek: 1, schedule: [...data.schedule] };
-            document.getElementById("custom-setup").classList.add("hidden");
-            document.getElementById("real-setup").classList.add("hidden");
-            document.getElementById("game-screen").classList.remove("hidden");
-        }
-        function simulateWeek() {
-            if (activeGame.currentWeek > 2) return;
-            activeGame.wins++;
-            document.getElementById("game-log").innerHTML += `<div>Week ${activeGame.currentWeek} Win</div>`;
-            document.getElementById("record-display").innerText = `${activeGame.wins} - ${activeGame.losses}`;
-            activeGame.currentWeek++;
-        }
-    </script>
-</body>
-</html>
+        const nfl32Database = {
+            Chiefs: { name: "Kansas City Chiefs", ovr: 92, off: 95, def: 88, roster: {"Patrick Mahomes": 99, "Travis Kelce": 99, "Chris Jones": 97, "Creed Humphrey": 95, "Isiah Pacheco": 87, "Rashee Rice": 85, "Trent McDuffie": 90, "George Karlaftis": 84} },
+            Niners: { name: "San Francisco 49ers", ovr: 92, off: 88, def: 93, roster: {"Christian McCaffrey": 99, "Trent Williams": 99, "Fred Warner": 97, "George Kittle": 97, "Nick Bosa": 96, "Brandon Aiyuk": 91, "Deebo Samuel": 89, "Brock Purdy": 85} },
+            Ravens: { name: "Baltimore Ravens", ovr: 91, off: 89, def: 91, roster: {"Lamar Jackson": 98, "Derrick Henry": 94, "Roquan Smith": 95, "Kyle Hamilton": 93, "Mark Andrews": 94, "Justin Madubuike": 91, "Zay Flowers": 85, "Tyler Linderbaum": 92} },
+            Dolphins: { name: "Miami Dolphins", ovr: 89, off: 91, def: 86, roster: {"Tyreek Hill": 99, "Jalen Ramsey": 96, "Jevon Holland": 92, "Jaylen Waddle": 87, "Tua Tagovailoa": 84, "Raheem Mostert": 86, "Terron Armstead": 92, "Zach Sieler": 83} },
+            Lions: { name: "Detroit Lions", ovr: 88, off: 90, def: 84, roster: {"Amon-Ra St. Brown": 95, "Penei Sewell": 96, "Sam LaPorta": 89, "Jahmyr Gibbs": 87, "Aidan Hutchinson": 93, "Jared Goff": 83, "Frank Ragnow": 93, "David Montgomery": 85} },
+            Cowboys: { name: "Dallas Cowboys", ovr: 88, off: 87, def: 89, roster: {"Micah Parsons": 98, "CeeDee Lamb": 96, "Dak Prescott": 85, "Trevon Diggs": 89, "DeMarcus Lawrence": 88, "Tyler Smith": 90, "Jake Ferguson": 85, "Zack Martin": 97} },
+            Browns: { name: "Cleveland Browns", ovr: 87, off: 81, def: 92, roster: {"Myles Garrett": 98, "Nick Chubb": 96, "David Njoku": 90, "Amari Cooper": 87, "Denzel Ward": 90, "Dalvin Tomlinson": 83, "Grant Delpit": 83, "Deshaun Watson": 75} },
+            Bengals: { name: "Cincinnati Bengals", ovr: 87, off: 89, def: 83, roster: {"Joe Burrow": 93, "Ja'Marr Chase": 93, "Tee Higgins": 86, "Trey Hendrickson": 91, "Logan Wilson": 85, "Cam Taylor-Britt": 83, "Mike Hilton": 83, "Sheldon Rankins": 80} },
+            Eagles: { name: "Philadelphia Eagles", ovr: 87, off: 88, def: 85, roster: {"A.J. Brown": 95, "Saquon Barkley": 92, "Lane Johnson": 95, "Jalen Hurts": 86, "DeVonta Smith": 87, "Darius Slay": 87, "Jalen Carter": 84, "C.J. Gardner-Johnson": 82} },
+            Texans: { name: "Houston Texans", ovr: 86, off: 86, def: 84, roster: {"C.J. Stroud": 89, "Stefon Diggs": 89, "Joe Mixon": 85, "Nico Collins": 85, "Will Anderson Jr.": 89, "Danielle Hunter": 88, "Derek Stingley Jr.": 87, "Laremy Tunsil": 92} },
+            Jets: { name: "New York Jets", ovr: 86, off: 82, def: 88, roster: {"Sauce Gardner": 97, "Quinnen Williams": 94, "Garrett Wilson": 88, "Breece Hall": 87, "Aaron Rodgers": 83, "C.J. Mosley": 87, "Tyron Smith": 91, "Haason Reddick": 88} },
+            Bills: { name: "Buffalo Bills", ovr: 85, off: 85, def: 83, roster: {"Josh Allen": 92, "James Cook": 83, "Dalton Kincaid": 83, "Ed Oliver": 88, "Matt Milano": 87, "Taron Johnson": 88, "Dion Dawkins": 86, "Rasul Douglas": 84} },
+            Steelers: { name: "Pittsburgh Steelers", ovr: 85, off: 78, def: 90, roster: {"T.J. Watt": 97, "Minkah Fitzpatrick": 93, "Cameron Heyward": 87, "George Pickens": 83, "Russell Wilson": 76, "Najee Harris": 81, "Joey Porter Jr.": 82, "Alex Highsmith": 86} },
+            Falcons: { name: "Atlanta Falcons", ovr: 84, off: 83, def: 83, roster: {"Jessie Bates III": 97, "Chris Lindstrom": 94, "A.J. Terrell": 89, "Bijan Robinson": 84, "Kirk Cousins": 84, "Kyle Pitts": 83, "Drake London": 82, "Matthew Judon": 85} },
+            Buccaneers: { name: "Tampa Bay Buccaneers", ovr: 84, off: 82, def: 84, roster: {"Antoine Winfield Jr.": 94, "Mike Evans": 89, "Lavonte David": 87, "Baker Mayfield": 79, "Tristan Wirfs": 94, "Chris Godwin": 85, "Vita Vea": 88, "Rachaad White": 80} },
+            Packers: { name: "Green Bay Packers", ovr: 81, off: 81, def: 80, roster: {"Jordan Love": 87, "Josh Jacobs": 86, "Jaire Alexander": 91, "Kenny Clark": 86, "Rashan Gary": 85, "Xavier McKinney": 88, "Elgton Jenkins": 86, "Jayden Reed": 81} },
+            Bears: { name: "Chicago Bears", ovr: 81, off: 79, def: 82, roster: {"DJ Moore": 88, "Keenan Allen": 88, "Jaylon Johnson": 91, "Montezh Sweat": 85, "Caleb Williams": 76, "Cole Kmet": 83, "Tremaine Edmunds": 84, "T.J. Edwards": 86} },
+            Raiders: { name: "Las Vegas Raiders", ovr: 81, off: 74, def: 85, roster: {"Maxx Crosby": 97, "Davante Adams": 94, "Christian Wilkins": 88, "Kolton Miller": 87, "Robert Spillane": 81, "Nate Hobbs": 80, "Gardner Minshew": 74, "Zamir White": 77} },
+            Chargers: { name: "Los Angeles Chargers", ovr: 82, off: 79, def: 83, roster: {"Justin Herbert": 87, "Derwin James Jr.": 91, "Khalil Mack": 87, "Joey Bosa": 87, "Rashawn Slater": 88, "Gus Edwards": 79, "Joshua Palmer": 79, "Asante Samuel Jr.": 81} },
+            Colts: { name: "Indianapolis Colts", ovr: 82, off: 82, def: 80, roster: {"Jonathan Taylor": 87, "Michael Pittman Jr.": 86, "DeForest Buckner": 87, "Quenton Nelson": 90, "Anthony Richardson": 76, "Kenny Moore II": 84, "Zaire Franklin": 81, "Bernhard Raimann": 82} },
+            Jaguars: { name: "Jacksonville Jaguars", ovr: 82, off: 81, def: 81, roster: {"Trevor Lawrence": 83, "Travis Etienne Jr.": 85, "Evan Engram": 86, "Josh Allen-Hines": 91, "Tyson Campbell": 85, "Foyesade Oluokun": 86, "Arik Armstead": 83, "Christian Kirk": 82} },
+Rams: { name: "Los Angeles Rams", ovr: 82, off: 85, def: 77, roster: {"Kyren Williams": 86, "Puka Nacua": 86, "Cooper Kupp": 88, "Matthew Stafford": 83, "Rob Havenstein": 86, "Tre'Davious White": 80, "Kobiy Turner": 82, "Darious Williams": 83} },
+Vikings: { name: "Minnesota Vikings", ovr: 83, off: 82, def: 82, roster: {"Justin Jefferson": 98, "Aaron Jones": 85, "T.J. Hockenson": 89, "Christian Darrisaw": 90, "Harrison Smith": 83, "Jonathan Greenard": 83, "Stephon Gilmore": 81, "Sam Darnold": 73} },
+Saints: { name: "New Orleans Saints", ovr: 83, off: 80, def: 84, roster: {"Demario Davis": 92, "Tyrann Mathieu": 88, "Marshon Lattimore": 87, "Chris Olave": 86, "Alvin Kamara": 84, "Ryan Ramczyk": 86, "Carl Granderson": 82, "Derek Carr": 76} },
+Titans: { name: "Tennessee Titans", ovr: 80, off: 77, def: 81, roster: {"L'Jarius Sneed": 90, "Chidobe Awuzie": 81, "Jeffrey Simmons": 87, "Calvin Ridley": 82, "Tony Pollard": 83, "DeAndre Hopkins": 84, "Will Levis": 72, "Harold Landry III": 80} },
+Seahawks: { name: "Seattle Seahawks", ovr: 80, off: 80, def: 79, roster: {"DK Metcalf": 86, "Kenneth Walker III": 84, "Tyler Lockett": 84, "Devon Witherspoon": 87, "Geno Smith": 78, "Leonard Williams": 84, "Riq Woolen": 81, "Noah Fant": 80} },
+Patriots: { name: "New England Patriots", ovr: 80, off: 72, def: 85, roster: {"Jabrill Peppers": 88, "Christian Gonzalez": 84, "Kyle Dugger": 86, "Rhamondre Stevenson": 82, "Hunter Henry": 80, "David Andrews": 83, "Anfernee Jennings": 81, "Drake Maye": 74} },
+Broncos: { name: "Denver Broncos", ovr: 79, off: 74, def: 82, roster: {"Pat Surtain II": 95, "Courtland Sutton": 82, "Quinn Meinerz": 89, "Alex Singleton": 81, "Zach Allen": 81, "Bo Nix": 73, "Javonte Williams": 79, "Brandon Jones": 80} },
+Panthers: { name: "Carolina Panthers", ovr: 79, off: 78, def: 77, roster: {"Derrick Brown": 90, "Jadeveon Clowney": 82, "Diontae Johnson": 81, "Adam Thielen": 80, "Robert Hunt": 84, "Taylor Moton": 84, "Bryce Young": 73, "Shaq Thompson": 79} },
+Commanders: { name: "Washington Commanders", ovr: 78, off: 77, def: 78, roster: {"Terry McLaurin": 88, "Jonathan Allen": 87, "Daron Payne": 84, "Bobby Wagner": 87, "Austin Ekeler": 82, "Jayden Daniels": 76, "Brian Robinson Jr.": 81, "Frankie Luvu": 82} },
+Cardinals: { name: "Arizona Cardinals", ovr: 76, off: 77, def: 74, roster: {"Kyler Murray": 80, "Buda Baker": 90, "Marvin Harrison Jr.": 79, "James Conner": 83, "Trey McBride": 85, "Paris Johnson Jr.": 80, "Sean Murphy-Bunting": 78, "Kyzir White": 78} },
+Giants: { name: "New York Giants", ovr: 75, off: 71, def: 78, roster: {"Dexter Lawrence II": 95, "Brian Burns": 86, "Kayvon Thibodeaux": 82, "Malik Nabers": 81, "Daniel Jones": 71, "Andrew Thomas": 89, "Bobby Okereke": 84, "Devin Singletary": 79} }
+};
+const schedulePool = ["Chiefs", "Niners", "Ravens", "Dolphins", "Lions", "Cowboys", "Browns", "Bengals", "Eagles", "Texans", "Jets", "Bills", "Steelers", "Falcons", "Buccaneers", "Packers", "Bears", "Raiders", "Chargers", "Colts", "Jaguars", "Rams", "Vikings", "Saints", "Titans", "Seahawks", "Patriots", "Broncos", "Panthers", "Commanders", "Cardinals", "Giants"];
+let gameMode = "classic";
+let activeTeamKey = "Chiefs";
+let session = { wins: 0, losses: 0, currentWeek: 1, schedule: [], playoffRound: 0 };
+window.onload = function() {
+const selectMenu = document.getElementById("team-select");
+for (let key in nfl32Database) {
+let opt = document.createElement("option");
+opt.value = key;
+opt.innerText = nfl32Database[key].name;
+selectMenu.appendChild(opt);
+}
+updateTeamPreview();
+};
+function switchMode(mode) {
+gameMode = mode;
+document.getElementById("tab-classic").classList.toggle("active", mode === 'classic');
+document.getElementById("tab-ring").classList.toggle("active", mode === 'ring');
+document.getElementById("display-mode").innerText = mode === 'classic' ? "17-0 RUN" : "RING RUN";
+}
+function updateTeamPreview() {
+activeTeamKey = document.getElementById("team-select").value;
+const data = nfl32Database[activeTeamKey];
+document.getElementById("prev-name").innerText = data.name;
+document.getElementById("prev-ovr").innerText = data.ovr;
+document.getElementById("prev-off").innerText = data.off;
+document.getElementById("prev-def").innerText = data.def;
+let rosterHtml = "";
+for (let player in data.roster) {
+rosterHtml += <div>• ${player} <span class="stat-badge">${data.roster[player]} OVR</span></div>;
+}
+document.getElementById("prev-roster").innerHTML = rosterHtml;
+}
+function generateUniqueSchedule(userKey) {
+let list = schedulePool.filter(team => team !== userKey);
+return list.sort(() => 0.5 - Math.random()).slice(0, 17);
+}
+function launchFranchise() {
+const data = nfl32Database[activeTeamKey];
+session.wins = 0;
+session.losses = 0;
+session.currentWeek = 1;
+session.playoffRound = 0;
+session.schedule = generateUniqueSchedule(activeTeamKey);
+document.getElementById("display-team").innerText = data.name;
+document.getElementById("display-rating").innerText = data.ovr;
+document.getElementById("record-display").innerText = "0 - 0";
+document.getElementById("game-log").innerHTML = <div>🚀 Franchise loaded! Objective: ${gameMode === 'classic' ? 'Go undefeated 17-0' : 'Win the Super Bowl'}</div>;
+updateNextMatchupDisplay();
+document.getElementById("setup-screen").classList.add("hidden");
+document.getElementById("game-screen").classList.remove("hidden");
+document.getElementById("sim-btn").innerText = "Simulate Next Game";
+document.getElementById("sim-btn").setAttribute("onclick", "processSimStep()");
+}
+function updateNextMatchupDisplay() {
+if (session.currentWeek <= 17) {
+let opp = nfl32Database[session.schedule[session.currentWeek - 1]].name;
+document.getElementById("week-display").innerText = Week ${session.currentWeek} vs ${opp};
+} else if (gameMode === "ring") {
+const rounds = ["Wildcard Round", "Divisional Round", "Conference Championship", "💸 SUPER BOWL 💸"];
+document.getElementById("week-display").innerText = rounds[session.playoffRound];
+}
+}
+function processSimStep() {
+if (session.currentWeek <= 17) {
+simulateRegularSeasonGame();
+} else if (gameMode === "ring" && session.playoffRound < 4) {
+simulatePlayoffGame();
+}
+}
+function simulateRegularSeasonGame() {
+let oppKey = session.schedule[session.currentWeek - 1];
+let oppData = nfl32Database[oppKey];
+let userData = nfl32Database[activeTeamKey];
+let winChance = 0.5 + ((userData.ovr - oppData.ovr) * 0.02);
+let userWon = Math.random() < winChance;
+let userScore = Math.floor(Math.random() * 17) + Math.floor(userData.off / 4);
+let oppScore = Math.floor(Math.random() * 17) + Math.floor(oppData.off / 4);
+if (userWon && userScore <= oppScore) userScore = oppScore + Math.floor(Math.random() * 7) + 1;
+if (!userWon && oppScore <= userScore) oppScore = userScore + Math.floor(Math.random() * 7) + 1;
+const log = document.getElementById("game-log");
+if (userWon) {
+session.wins++;
+log.innerHTML = <div style="color:#4ade80">🟢 Week ${session.currentWeek}: W ${userScore}-${oppScore} vs ${oppData.name}</div> + log.innerHTML;
+} else {
+session.losses++;
+log.innerHTML = <div style="color:#f87171">🔴 Week ${session.currentWeek}: L ${userScore}-${oppScore} vs ${oppData.name}</div> + log.innerHTML;
+}
+document.getElementById("record-display").innerText = ${session.wins} - ${session.losses};
+session.currentWeek++;
+if (session.currentWeek > 17) {
+handleRegularSeasonEnd();
+} else {
+updateNextMatchupDisplay();
+}
+}
+function handleRegularSeasonEnd() {
+const log = document.getElementById("game-log");
+if (gameMode === "classic") {
+if (session.wins === 17) {
+log.innerHTML = <div style="color: #fbbf24; font-weight: bold; font-size: 1.2em;">🏆 GOLDEN GOAL ACHIEVED! Perfect 17-0!</div> + log.innerHTML;
+} else {
+log.innerHTML = <div style="color: #ef4444;">Challenged missed! Final record: ${session.wins}-${session.losses}.</div> + log.innerHTML;
+}
+triggerResetState();
+} else {
+if (session.wins >= 9) {
+log.innerHTML = <div style="color: #38bdf8; font-weight: bold;">🔥 Finished ${session.wins}-${session.losses}. You Clinched the Playoffs! Entering Tournament...</div> + log.innerHTML;
+updateNextMatchupDisplay();
+} else {
+log.innerHTML = <div style="color: #ef4444;">Missed the playoffs (${session.wins}-${session.losses}). Ring Run Over.</div> + log.innerHTML;
+triggerResetState();
+}
+}
+}
+function simulatePlayoffGame() {
+let eliteOpponents = ["Chiefs", "Niners", "Ravens", "Dolphins", "Lions", "Cowboys"].filter(k => k !== activeTeamKey);
+let oppKey = eliteOpponents[Math.floor(Math.random() * eliteOpponents.length)];
+let oppData = nfl32Database[oppKey];
+let userData = nfl32Database[activeTeamKey];
+let winChance = 0.48 + ((userData.ovr - oppData.ovr) * 0.02);
+let userWon = Math.random() < winChance;
+let userScore = Math.floor(Math.random() * 14) + Math.floor(userData.off / 4) + 3;
+let oppScore = Math.floor(Math.random() * 14) + Math.floor(oppData.off / 4) + 3;
+if (userWon && userScore <= oppScore) userScore = oppScore + 3;
+if (!userWon && oppScore <= userScore) oppScore = userScore + 3;
+const log = document.getElementById("game-log");
+const roundNames = ["Wildcard", "Divisional", "Conference Championship", "Super Bowl"];
+let currentRoundName = roundNames[session.playoffRound];
+if (userWon) {
+log.innerHTML = <div style="color:#a78bfa; font-weight:bold;">🏆 ${currentRoundName} Victory: W ${userScore}-${oppScore} vs ${oppData.name}</div> + log.innerHTML;
+session.playoffRound++;
+if (session.playoffRound === 4) {
+log.innerHTML = <div style="color: #fbbf24; font-weight: bold; font-size: 1.4em; padding:10px 0;">👑 WORLD CHAMPIONS! You won the Super Bowl! 👑</div> + log.innerHTML;
+triggerResetState();
+} else {
+updateNextMatchupDisplay();
+}
+} else {
+log.innerHTML = <div style="color:#ef4444; font-weight:bold;">❌ Knocked out in the ${currentRoundName}: L ${userScore}-${oppScore} vs ${oppData.name}</div> + log.innerHTML;
+triggerResetState();
+}
+}
+function triggerResetState() {
+document.getElementById("week-display").innerText = "Tournament/Season Over";
+document.getElementById("sim-btn").innerText = "Main Menu / Restart";
+document.getElementById("sim-btn").setAttribute("onclick", "location.reload()");
+}
